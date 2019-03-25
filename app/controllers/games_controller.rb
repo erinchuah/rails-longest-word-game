@@ -6,11 +6,9 @@ class GamesController < ApplicationController
     @letters = Array.new(10) { [*'A'..'Z'].sample }
   end
 
-  def score()
-    @score = 0
+  def score
     @user_word = params[:user_word].upcase.split('')
     @computer_grid = params[:letters].upcase.split(' ')
-    raise
 
     #check whether all letters were in provided list
     check_letters = @user_word.all? { |letter| @user_word.count(letter) <= @computer_grid.count(letter) }
@@ -21,6 +19,7 @@ class GamesController < ApplicationController
     dictionary_hash = JSON.parse(dictionary_serialized)
 
     #generate score
+    session[:score].nil? ? @score = 0 : @score = session[:score]
     if check_letters == false
       @results = "Sorry but #{@user_word.join('')} can't be built out of #{@computer_grid.join(", ")}"
     elsif dictionary_hash["found"] == false
@@ -28,6 +27,12 @@ class GamesController < ApplicationController
     else
       @results = "Congratulations! #{@user_word.join('')} is a valid English word!"
       @score += @user_word.length
+      session[:score] = @score
     end
+  end
+
+  def end
+    session[:score] = nil
+    redirect_to '/new'
   end
 end
